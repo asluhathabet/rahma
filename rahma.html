@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الكفو الشيخ الصنديد ليث</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+  font-family: 'Arial', sans-serif;
+  text-align:center;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  padding:20px;
+}
+h1 {
+  font-size:2.5rem;
+  color:#222;
+  margin-bottom:20px;
+  text-shadow:2px 2px 5px rgba(0,0,0,0.2);
+}
+.scoreboard {
+  font-size:1.2rem;
+  font-weight:bold;
+  margin-bottom:30px;
+  color:#333;
+}
+.question {
+  display:none;
+  font-size:1.3rem;
+  font-weight:bold;
+  background: rgba(255,255,255,0.95);
+  padding:20px;
+  border-radius:20px;
+  width:90%;
+  max-width:400px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+  margin:20px auto; /* وسط الشاشة */
+  position:relative;
+}
+button {
+  padding:15px 25px;
+  font-size:1rem;
+  margin:10px;
+  border:none;
+  border-radius:15px;
+  cursor:pointer;
+  transition: transform 0.2s;
+  background:#ff6b6b;
+  color:white;
+  font-weight:bold;
+  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  position:relative;
+}
+button:hover { transform: scale(1.1); }
+#startBtn {
+  padding:20px 40px;
+  font-size:1.5rem;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color:white;
+  border-radius:25px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+#celebration {
+  display:none;
+  font-size:2rem;
+  color:#27ae60;
+  margin-top:30px;
+  text-shadow:2px 2px 5px rgba(0,0,0,0.3);
+}
+canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+@media (max-width:480px){
+  h1{font-size:2rem;}
+  .question{font-size:1.1rem; padding:15px;}
+  button{padding:12px 20px;font-size:0.9rem;}
+  #startBtn{font-size:1.3rem;padding:15px 30px;}
+}
+</style>
+</head>
+<body>
+
+<h1>الكفو الشيخ الصنديد ليث</h1>
+<button id="startBtn">دخول اللعبة</button>
+
+<div class="scoreboard" id="scoreboard">🏆 ليث: 0 | 😅 رحمة: 0</div>
+
+<div id="quiz">
+  <div class="question" id="q1">
+    <p>مين أزلم حد بحياتك؟</p>
+    <button onclick="correctAnswer(1)">ليث</button>
+    <button id="escape1">مش ليث</button>
+  </div>
+  <div class="question" id="q2">
+    <p>يا رحمة، هل انتي ندمانة؟</p>
+    <button onclick="correctAnswer(2)">اه وكثيييير</button>
+    <button id="escape2">لا</button>
+  </div>
+  <div class="question" id="q3">
+    <p>هل في ضحكات عفوية من هان وغادددددد؟</p>
+    <button onclick="correctAnswer(3)">لا ما بعيدها</button>
+    <button id="escape3">مالك دخل</button>
+  </div>
+  <div class="question" id="q4">
+    <p>هل ليث فاز بالحرب؟</p>
+    <button onclick="correctAnswer(4)">نعم</button>
+    <button id="escape4">لا</button>
+  </div>
+  <div class="question" id="q5">
+    <p>هل رحمة ما رح تعيدها وتفوت حروب مع ليث؟</p>
+    <button onclick="finishGame()">عادي تفوت متى ما بدها</button>
+    <button id="escape5">لا</button>
+  </div>
+</div>
+
+<div id="celebration">🎉 ليث فاييييز! 🎉</div>
+
+<!-- Confetti canvas -->
+<canvas id="confetti"></canvas>
+
+<!-- YouTube Audio مخفي -->
+<div id="player" style="display:none;"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+const startBtn=document.getElementById("startBtn");
+const questions=document.querySelectorAll(".question");
+const scoreboard=document.getElementById("scoreboard");
+const celebration=document.getElementById("celebration");
+const canvas=document.getElementById("confetti");
+const ctx=canvas.getContext("2d");
+
+let scoreLaith=0;
+let scoreRahma=0;
+let currentQuestion=1;
+let player;
+
+// إعداد YouTube Audio
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player('player',{
+    height:'0',
+    width:'0',
+    videoId:'qrzpzbEwI9A',
+    playerVars:{ autoplay:0, loop:1, playlist:'qrzpzbEwI9A' },
+    events:{ 'onReady':()=>{} }
+  });
+}
+
+startBtn.onclick=()=>{
+  startBtn.style.display="none";
+  document.getElementById("q1").style.display="block";
+};
+
+function correctAnswer(num){
+  scoreLaith+=1;
+  updateScore();
+  nextQuestion(num+1);
+}
+
+function nextQuestion(num){
+  document.getElementById("q"+currentQuestion).style.display="none";
+  if(num<=questions.length){
+    document.getElementById("q"+num).style.display="block";
+    currentQuestion=num;
+  }
+}
+
+function finishGame(){
+  document.getElementById("q5").style.display="none";
+  celebration.style.display="block";
+  updateScore();
+  startConfetti();
+  if(player) player.playVideo(); // تشغيل الأغنية
+}
+
+function updateScore(){
+  scoreboard.textContent=`🏆 ليث: ${scoreLaith} | 😅 رحمة: ${scoreRahma}`;
+}
+
+// أزرار التهرب
+function makeEscape(btnId){
+  const btn = document.getElementById(btnId);
+  btn.style.position = "absolute";
+  btn.addEventListener("mousemove", (e)=>{
+    const rect = btn.parentElement.getBoundingClientRect();
+    const x = Math.random()*(rect.width - btn.offsetWidth);
+    const y = Math.random()*(rect.height - btn.offsetHeight);
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+  });
+}
+makeEscape("escape1");
+makeEscape("escape2");
+makeEscape("escape3");
+makeEscape("escape4");
+makeEscape("escape5");
+
+// Confetti
+let confettiParticles=[];
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+function startConfetti(){
+  for(let i=0;i<150;i++){
+    confettiParticles.push({
+      x:Math.random()*canvas.width,
+      y:Math.random()*canvas.height-500,
+      r:Math.random()*6+4,
+      d:Math.random()*20+10,
+      color:`hsl(${Math.random()*360},100%,50%)`,
+      tilt:Math.random()*10-10,
+      tiltAngleIncrement:Math.random()*0.07+0.05
+    });
+  }
+  requestAnimationFrame(drawConfetti);
+}
+
+function drawConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  confettiParticles.forEach(p=>{
+    ctx.beginPath();
+    ctx.lineWidth=p.r/2;
+    ctx.strokeStyle=p.color;
+    ctx.moveTo(p.x+p.tilt+p.r/4,p.y);
+    ctx.lineTo(p.x+p.tilt,p.y+p.tilt+p.r/4);
+    ctx.stroke();
+    p.tilt+=p.tiltAngleIncrement;
+    p.y+=Math.sin(p.tiltAngleIncrement)*3+p.r/2;
+    if(p.y>canvas.height){p.y=-10; p.x=Math.random()*canvas.width;}
+  });
+  requestAnimationFrame(drawConfetti);
+}
+
+// تحديث حجم canvas عند تغير حجم الشاشة
+window.addEventListener("resize",()=>{
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+});
+</script>
+
+</body>
+</html>

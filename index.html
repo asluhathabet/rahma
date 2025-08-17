@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>الكفو الشيخ الصنديد ليث</title>
+<title>معركةة الشيخ ليث ورحمة    </title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+  background: linear-gradient(120deg, #0f0c29, #302b63, #24243e);
   font-family: 'Arial', sans-serif;
   text-align:center;
   min-height:100vh;
@@ -20,27 +20,29 @@ body {
 }
 h1 {
   font-size:2.5rem;
-  color:#222;
+  color:#0ff;
   margin-bottom:20px;
-  text-shadow:2px 2px 5px rgba(0,0,0,0.2);
+  text-shadow:2px 2px 10px #000;
 }
 .scoreboard {
   font-size:1.2rem;
   font-weight:bold;
-  margin-bottom:30px;
-  color:#333;
+  margin-bottom:20px;
+  color:white;
+  text-shadow:2px 2px 5px #000;
 }
 .question {
   display:none;
   font-size:1.3rem;
   font-weight:bold;
-  background: rgba(255,255,255,0.95);
+  background: rgba(0,0,0,0.8);
+  color:#fff;
   padding:20px;
   border-radius:20px;
   width:90%;
   max-width:400px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.2);
-  margin:20px auto; /* وسط الشاشة */
+  box-shadow:0 5px 20px rgba(0,0,0,0.5);
+  margin:20px auto;
   position:relative;
 }
 button {
@@ -50,30 +52,36 @@ button {
   border:none;
   border-radius:15px;
   cursor:pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, background 0.3s;
   background:#ff6b6b;
   color:white;
   font-weight:bold;
-  box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
   position:relative;
 }
-button:hover { transform: scale(1.1); }
+button:hover { transform: scale(1.2) rotate(3deg); background:#ff0000;}
 #startBtn {
   padding:20px 40px;
   font-size:1.5rem;
   background: linear-gradient(90deg, #6a11cb, #2575fc);
   color:white;
   border-radius:25px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+  box-shadow:0 5px 15px rgba(0,0,0,0.5);
 }
 #celebration {
   display:none;
   font-size:2rem;
-  color:#27ae60;
+  color:#0ff;
   margin-top:30px;
-  text-shadow:2px 2px 5px rgba(0,0,0,0.3);
+  text-shadow:2px 2px 10px #000;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
 }
 canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+#gameArea { position:relative; width:100%; max-width:500px; height:300px; margin-top:20px; }
+#movingBtn { position:absolute; padding:10px 20px; background:#ff0; color:#000; border-radius:10px; cursor:pointer; }
 @media (max-width:480px){
   h1{font-size:2rem;}
   .question{font-size:1.1rem; padding:15px;}
@@ -84,7 +92,7 @@ canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-even
 </head>
 <body>
 
-<h1>الكفو الشيخ الصنديد ليث</h1>
+<h1>ابو عوض واقطعع   </h1>
 <button id="startBtn">دخول اللعبة</button>
 
 <div class="scoreboard" id="scoreboard">🏆 ليث: 0 | 😅 رحمة: 0</div>
@@ -112,17 +120,15 @@ canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-even
   </div>
   <div class="question" id="q5">
     <p>هل رحمة ما رح تعيدها وتفوت حروب مع ليث؟</p>
-    <button onclick="finishGame()">عادي تفوت متى ما بدها</button>
+    <button onclick="startMiniGames()">عادي تفوت متى ما بدها</button>
     <button id="escape5">لا</button>
   </div>
 </div>
 
-<div id="celebration">🎉 اذلفي يلاااااا  🎉</div>
+<div id="gameArea"></div>
+<div id="celebration">🎉 خاوة ندمتي! 🎆🔥</div>
 
-<!-- Confetti canvas -->
 <canvas id="confetti"></canvas>
-
-<!-- YouTube Audio مخفي -->
 <div id="player" style="display:none;"></div>
 <script src="https://www.youtube.com/iframe_api"></script>
 
@@ -133,13 +139,13 @@ const scoreboard=document.getElementById("scoreboard");
 const celebration=document.getElementById("celebration");
 const canvas=document.getElementById("confetti");
 const ctx=canvas.getContext("2d");
+const gameArea=document.getElementById("gameArea");
 
 let scoreLaith=0;
 let scoreRahma=0;
 let currentQuestion=1;
 let player;
 
-// إعداد YouTube Audio
 function onYouTubeIframeAPIReady(){
   player=new YT.Player('player',{
     height:'0',
@@ -169,23 +175,15 @@ function nextQuestion(num){
   }
 }
 
-function finishGame(){
-  document.getElementById("q5").style.display="none";
-  celebration.style.display="block";
-  updateScore();
-  startConfetti();
-  if(player) player.playVideo(); // تشغيل الأغنية
-}
-
 function updateScore(){
   scoreboard.textContent=`🏆 ليث: ${scoreLaith} | 😅 رحمة: ${scoreRahma}`;
 }
 
 // أزرار التهرب
 function makeEscape(btnId){
-  const btn = document.getElementById(btnId);
-  btn.style.position = "absolute";
-  btn.addEventListener("mousemove", (e)=>{
+  const btn=document.getElementById(btnId);
+  btn.style.position="absolute";
+  btn.addEventListener("mousemove",()=>{
     const rect = btn.parentElement.getBoundingClientRect();
     const x = Math.random()*(rect.width - btn.offsetWidth);
     const y = Math.random()*(rect.height - btn.offsetHeight);
@@ -193,19 +191,14 @@ function makeEscape(btnId){
     btn.style.top = y + "px";
   });
 }
-makeEscape("escape1");
-makeEscape("escape2");
-makeEscape("escape3");
-makeEscape("escape4");
-makeEscape("escape5");
+["escape1","escape2","escape3","escape4","escape5"].forEach(makeEscape);
 
 // Confetti
 let confettiParticles=[];
 canvas.width=window.innerWidth;
 canvas.height=window.innerHeight;
-
 function startConfetti(){
-  for(let i=0;i<150;i++){
+  for(let i=0;i<300;i++){
     confettiParticles.push({
       x:Math.random()*canvas.width,
       y:Math.random()*canvas.height-500,
@@ -218,7 +211,6 @@ function startConfetti(){
   }
   requestAnimationFrame(drawConfetti);
 }
-
 function drawConfetti(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   confettiParticles.forEach(p=>{
@@ -235,7 +227,80 @@ function drawConfetti(){
   requestAnimationFrame(drawConfetti);
 }
 
-// تحديث حجم canvas عند تغير حجم الشاشة
+// ألعاب بسيطة بعد الأسئلة
+function startMiniGames(){
+  document.getElementById("q5").style.display="none";
+  gameArea.innerHTML="";
+  // لعبة سرعة الضغط على زر
+  let btn=document.createElement("div");
+  btn.id="movingBtn";
+  btn.textContent="اضغطني بسرعة!";
+  gameArea.appendChild(btn);
+  let score=0;
+  let interval=setInterval(()=>{
+    btn.style.top=Math.random()*250+"px";
+    btn.style.left=Math.random()*250+"px";
+  },800);
+  btn.onclick=()=>{
+    scoreLaith+=1;
+    updateScore();
+    score++;
+    if(score>=5){
+      clearInterval(interval);
+      gameArea.innerHTML="";
+      showCelebration();
+    }
+  };
+}
+
+function showCelebration(){
+  celebration.style.display="block";
+  startConfetti();
+  startFireworks();
+  if(player) player.playVideo();
+  animateText();
+}
+
+// ألعاب نارية
+function startFireworks(){
+  for(let i=0;i<100;i++){
+    setTimeout(()=>{
+      const particle=document.createElement("div");
+      particle.style.position="absolute";
+      particle.style.width="5px";
+      particle.style.height="5px";
+      particle.style.borderRadius="50%";
+      particle.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+      particle.style.left=Math.random()*window.innerWidth+"px";
+      particle.style.top=Math.random()*window.innerHeight/2+"px";
+      document.body.appendChild(particle);
+      let dx=(Math.random()-0.5)*10;
+      let dy=Math.random()*-10-2;
+      let life=50;
+      const anim=setInterval(()=>{
+        life--;
+        particle.style.left=parseFloat(particle.style.left)+dx+"px";
+        particle.style.top=parseFloat(particle.style.top)+dy+"px";
+        dy+=0.3;
+        if(life<=0){clearInterval(anim); particle.remove();}
+      },30);
+    }, i*50);
+  }
+}
+
+// نص يدور على الشاشة
+function animateText(){
+  let angle=0;
+  setInterval(()=>{
+    let radius=100;
+    let centerX=window.innerWidth/2;
+    let centerY=window.innerHeight/2;
+    celebration.style.left=centerX+radius*Math.cos(angle)+"px";
+    celebration.style.top=centerY+radius*Math.sin(angle)+"px";
+    angle+=0.05;
+  },30);
+}
+
 window.addEventListener("resize",()=>{
   canvas.width=window.innerWidth;
   canvas.height=window.innerHeight;
@@ -244,4 +309,3 @@ window.addEventListener("resize",()=>{
 
 </body>
 </html>
-
